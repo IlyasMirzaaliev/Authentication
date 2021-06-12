@@ -1,6 +1,5 @@
 module.exports = (app) => {
   app.get("/", (req, res) => {
-    // res.send("<h1>Home Page</h1>");
     res.render("index");
   });
 
@@ -8,5 +7,7 @@ module.exports = (app) => {
     res.render("register");
   });
 
-
+  app.get("/login", (req, res) => {
+    res.render("login");
+  });
 };
