@@ -1,35 +1,40 @@
 const express = require("express");
-const bodyParser = require("body-parser");
-const cookieParser = require("cookie-parser");
+const mysql = require("./dbconnect/mysql");
 const path = require("path");
-const dotenv = require("dotenv");
-const hbs = require("handlebars");
-
 const app = express();
-dotenv.config({ path: "./.env" });
+const hbs = require("hbs");
+const cookieParser = require("cookie-parser");
+require("dotenv").config({ path: "./.env" });
+const PORT = process.env.SERVER_PORT;
 
-const publicDirectory = path.join(__dirname, "/public");
-app.use(express.static(publicDirectory));
+app.use(express.static(path.join(__dirname, "./public")));
 
-// parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: false }));
-
-// parse application/json
-app.use(bodyParser.json());
-
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(cookieParser());
-
-require("./dbconnect/dbconnect");
-require("./routes/routes")(app);
-app.use("/auth", require("./routes/auth"));
-// app.use("/login", require("./routes/login"));
 
 app.set("view engine", "hbs");
 
+app.use("/", require("./pages/pages"));
+app.use("/auth", require("./routes/auth"));
+
 const startServer = () => {
-  app.listen(4000, () => {
-    console.log(`SERVER started`);
-  });
+  try {
+    app.listen(PORT, () => {
+      console.log(`Server started on port ${PORT} \nWaiting for DB...`);
+    });
+    mysql.connect((err) => {
+      if (err) {
+        console.error("Pls check auth credentials ====> ", err);
+        return;
+      } else {
+        console.log("DB connected");
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    return;
+  }
 };
 
 startServer();
